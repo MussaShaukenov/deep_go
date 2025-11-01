@@ -10,14 +10,13 @@ type CircularQueue struct {
 	values []int
 	front  int
 	rear   int
+	count  int
 }
 
 // Создать очередь с определенным размером буффера
 func NewCircularQueue(size int) CircularQueue {
 	return CircularQueue{
 		values: make([]int, size),
-		front:  -1,
-		rear:   -1,
 	}
 }
 
@@ -27,14 +26,10 @@ func (q *CircularQueue) Push(value int) bool {
 		return false
 	}
 
-	if q.front == -1 { // empty queue
-		q.front = 0
-		q.rear = 0
-	} else {
-		q.rear = (q.rear + 1) % len(q.values)
-	}
-
 	q.values[q.rear] = value
+	q.rear = (q.rear + 1) % len(q.values)
+	q.count++
+
 	return true
 }
 
@@ -44,13 +39,8 @@ func (q *CircularQueue) Pop() bool {
 		return false
 	}
 
-	// element = q.values[q.front]
-	if q.front == q.rear {
-		q.front = -1
-		q.rear = -1
-	} else {
-		q.front = (q.front + 1) % len(q.values)
-	}
+	q.front = (q.front + 1) % len(q.values)
+	q.count--
 
 	return true
 }
@@ -70,25 +60,18 @@ func (q *CircularQueue) Back() int {
 		return -1
 	}
 
-	return q.values[q.rear]
+	last := (q.rear - 1 + len(q.values)) % len(q.values)
+	return q.values[last]
 }
 
 // проверить пустая ли очередь
 func (q *CircularQueue) Empty() bool {
-	return q.front == -1
+	return q.count == 0
 }
 
 // проверить заполнена ли очередь
 func (q *CircularQueue) Full() bool {
-	if q.front == 0 && q.rear == len(q.values)-1 {
-		return true
-	}
-
-	if q.front == q.rear+1 {
-		return true
-	}
-
-	return false
+	return q.count == len(q.values)
 }
 
 func main() {
